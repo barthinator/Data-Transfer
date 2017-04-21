@@ -228,14 +228,30 @@ public class CopyMachineFrame extends JFrame {
            try{
         	copyFolder(srcFolder,destFolder);
            }catch(IOException e){
-        	e.printStackTrace();
+        	//e.printStackTrace();
         	//error, just exit
-                System.exit(0);
+                System.out.println("Something didnt transfer...");
            }
         }
 
     	System.out.println("Done");
     }
+    
+    /**
+     * Need to reuse or use the above method to build a file list prior to calculating the percent values displayed
+     * in the progress bar. Maybe try running on a different thread and once the thread has completed then
+     * we can display progress. (So basically it would say something like "building file list" but would actually
+     * start copying the data, its just that once we have the total size and everything made, then we can
+     * display percentage values. My concern is that this may not work because it may take a looong time to
+     * build the file list.
+     */
+    
+    
+    //Assuming I need these as public variables. I can get progress information per folder, but still the data will
+    //be inaccurate because it is just local percentages not global ones. May need to implement threading before
+    //I can successfully get percentage values working.
+    public int fileCount = 0;
+    public int totalFileLength = 0;
 	
 	public void copyFolder(File src, File destination)
 	    	throws IOException{
@@ -254,19 +270,27 @@ public class CopyMachineFrame extends JFrame {
 
 	    		String s = "";
 	    		
-	    		int fileCount = 0;
+	    		totalFileLength += files.length;
+	    		
+	    		
 	    		for (String file : files) {
 	    		   //construct the src and dest file structure
 	    		   File srcFile = new File(src, file);
 	    		   File destFile = new File(destination, file);
 	    		   //recursive copy
+	    		   
+	    		   //This data is highly inaccurate, it also does not live update the progress bar
+	    		   //need to figure out how to do it live.
 	    		   System.out.println("File count" + fileCount++);
-	    		   System.out.println((int)(((double)fileCount / (double)files.length) * 100));
-	    		   String progress = (int)(((double)fileCount / (double)files.length) * 100) + "";
+	    		   System.out.println((int)(((double)totalFileLength) / (double)fileCount * 100));
+	    		   String progress = ((int)(((double)totalFileLength) / (double)fileCount * 100)) + "";
 	    		   s += progress + "% finished, " + fileCount + " successfully transfered" + "\r";
 	    		   transferInfo.setText(s);
-	    		   progressBar.setValue((int)(((double)fileCount / (double)files.length) * 100));
+	    		   progressBar.setValue(((int)(((double)totalFileLength) / (double)fileCount * 100)));
+	    		   
+	    		   //Recursive copy
 	    		   copyFolder(srcFile,destFile);
+	    		   
 	    		}
 
 	    	}else{
